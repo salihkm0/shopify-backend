@@ -2,11 +2,11 @@ import Customer from "../../models/userModel.js";
 
 // Update a customer
 export const updateCustomer = async (req, res) => {
-  const { id } = req.params;
+  const { email } = req.params;
   const updates = req.body;
 
   try {
-    const updatedCustomer = await Customer.findByIdAndUpdate(id, updates, {
+    const updatedCustomer = await Customer.findOneAndUpdate({user_email :email}, updates, {
       new: true,
     });
     if (!updatedCustomer) {

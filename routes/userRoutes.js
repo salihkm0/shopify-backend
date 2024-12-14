@@ -11,7 +11,7 @@ userRouter
   .post(createCustomer)
   .get(getAllCustomers);
 userRouter
-  .route("/:id")
+  .route("/:email")
   .get(getCustomerById)
   .put(updateCustomer)
   .delete(deleteCustomer);
