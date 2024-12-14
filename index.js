@@ -14,7 +14,7 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 
 app.use("/api/customer", userRouter);
-app.use("/api/review", reviewRouter);
+app.use("/api/reviews", reviewRouter);
 
 
 dbConnection()

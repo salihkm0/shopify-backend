@@ -16,6 +16,6 @@ reviewRouter.get("/", fetchReviews);
 reviewRouter.put("/:id", updateReview);
 reviewRouter.delete("/:id", deleteReview);
 reviewRouter.get("/product/:product_handle", fetchReviewsByProduct);
-reviewRouter.get("/product/:reviewer_email", fetchReviewsByUser);
+reviewRouter.get("/user/:reviewer_email", fetchReviewsByUser);
 
 export default reviewRouter;
