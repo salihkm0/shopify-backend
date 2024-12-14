@@ -2,10 +2,10 @@ import Customer from "../../models/userModel.js";
 
 // Delete a customer
 export const deleteCustomer = async (req, res) => {
-  const { email } = req.params;
+  const { id } = req.params;
 
   try {
-    const deletedCustomer = await Customer.findOneAndDelete({user_email : email});
+    const deletedCustomer = await Customer.findByIdAndDelete(id);
     if (!deletedCustomer) {
       return res.status(404).json({ message: "Customer not found." });
     }

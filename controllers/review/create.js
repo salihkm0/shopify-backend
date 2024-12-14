@@ -82,11 +82,13 @@ const API_KEY = process.env.API_KEY;
 const SHOP_DOMAIN = process.env.SHOP_DOMAIN;
 
 export const addReview = async (req, res) => {
-  const { reviewer_name, reviewer_email, rating, review_body, product_handle } = req.body;
+  const { reviewer_name, reviewer_email, rating, review_body, product_handle,title } = req.body;
 
   if (!reviewer_name || !reviewer_email || !rating || !review_body || !product_handle) {
     return res.status(400).json({ error: "All fields are required" });
   }
+
+
 
   // Prepare the review data
   const payload = {
@@ -95,7 +97,7 @@ export const addReview = async (req, res) => {
     email: reviewer_email,
     name: reviewer_name,
     rating,
-    title: "Sample Review",
+    title: title,
     body: review_body,
     id : product_handle
     // cf_answers: [

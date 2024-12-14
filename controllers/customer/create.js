@@ -4,12 +4,12 @@ import Customer from "../../models/userModel.js";
 export const createCustomer = async (req, res) => {
   const { user_email, cartId, checkoutUrl, phone } = req.body;
 
-  console.log("body : ", req.body);
+  console.log("create body : ", req.body);
 
   try {
     const existingCustomer = await Customer.findOne({ user_email });
     if (existingCustomer) {
-      return res.status(400).json({ message: "Customer already exists." });
+      return res.status(400).json({ message: "Customer already exists." ,user : existingCustomer});
     }
 
     const newCustomer = new Customer({

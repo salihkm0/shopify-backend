@@ -12,9 +12,9 @@ export const getAllCustomers = async (req, res) => {
 };
 // Get a single customer by ID
 export const getCustomerById = async (req, res) => {
-  const { email } = req.params;
+  const { id } = req.params;
   try {
-    const customer = await Customer.findOne({user_email :email});
+    const customer = await Customer.findById(id);
     if (!customer) {
       return res.status(404).json({ message: "Customer not found." ,success: false});
     }
