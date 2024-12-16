@@ -28,14 +28,16 @@ export const updateCustomerByEmail = async (req, res) => {
       const updatedCustomer = await Customer.findOneAndUpdate({user_email : email}, updates, {
         new: true,
       });
+
+      console.log("updatedCustomer :",updatedCustomer)
       if (!updatedCustomer) {
-        return res.status(404).json({ message: "Customer not found." });
+        return res.json({ message: "Customer not found." ,success : false});
       }
       console.log("Updated")
-      res.status(200).json(updatedCustomer);
+      res.status(200).json({updatedCustomer : updatedCustomer , success : true});
     } catch (error) {
       console.error("Error updating customer:", error);
-      res.status(500).json({ message: "Internal server error." });
+      res.json({ message: "Internal server error." ,success : false});
     }
   };
   
