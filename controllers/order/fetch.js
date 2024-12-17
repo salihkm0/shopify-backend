@@ -4,25 +4,24 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const SHOPIFY_STORE_NAME = process.env.SHOP_DOMAIN;
-const STOREFRONT_ACCESS_TOKEN = process.env.SHOPIFY;
+// const STOREFRONT_ACCESS_TOKEN = process.env.SHOPIFY
+const STOREFRONT_ACCESS_TOKEN = "aae77a75514b280e61a74cc7ee993635"
 const ADMIN_ACCESS_TOKEN = process.env.ADMIN_ACCESS_TOKEN;
 const STOREFRONT_API_URL = `https://${SHOPIFY_STORE_NAME}/api/2024-01/graphql.json`;
 const ADMIN_API_URL = `https://${SHOPIFY_STORE_NAME}/admin/api/2024-01/graphql.json`;
 
 export const fetchOrder = async (req, res) => {
-  const { customerAccessToken } = req.body;
-
-  const query = `
+    const { customerAccessToken } = req.body;
+  
+    const query = `
       query GetCustomerOrders($customerAccessToken: String!) {
         customer(customerAccessToken: $customerAccessToken) {
-          orders(first: 10) {
+          orders(first: 100) {
             edges {
               node {
                 id
                 name
-                financialStatus
-                fulfillmentStatus
-                lineItems(first: 10) {
+                lineItems(first: 100) {
                   edges {
                     node {
                       title
@@ -30,11 +29,9 @@ export const fetchOrder = async (req, res) => {
                     }
                   }
                 }
-                totalPriceSet {
-                  shopMoney {
-                    amount
-                    currencyCode
-                  }
+                currentTotalPrice {
+                  amount
+                  currencyCode
                 }
               }
             }
@@ -42,27 +39,33 @@ export const fetchOrder = async (req, res) => {
         }
       }
     `;
-
-  try {
-    const response = await axios.post(
-      STOREFRONT_API_URL,
-      { query, variables: { customerAccessToken } },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
-        },
-      }
-    );
-
-    const orders = response.data.data.customer.orders.edges.map(
-      (order) => order.node
-    );
-    res.json({ success: true, orders });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
+  
+    try {
+      const response = await axios.post(
+        STOREFRONT_API_URL,
+        { query, variables: { customerAccessToken } },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
+          },
+        }
+      );
+  
+      const orders = response.data.data.customer.orders.edges.map(
+        (order) => order.node
+      );
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error("Error Details:", JSON.stringify(error.response?.data, null, 2));
+      res.status(500).json({
+        success: false,
+        error: error.response?.data?.errors[0]?.message || "Unknown error",
+      });
+    }
+  };
+  
+  
 
 // export const fetchOrderStatus = async (orderId) => {
 //   const query = `
@@ -119,40 +122,148 @@ export const fetchOrder = async (req, res) => {
 //   }
 // };
 
+// export const fetchOrder = async (req, res) => {
+//     const { customerAccessToken } = req.body;
+  
+//     const query = `
+//       query GetCustomerOrders($customerAccessToken: String!) {
+//         customer(customerAccessToken: $customerAccessToken) {
+//           orders(first: 100) {
+//             edges {
+//               node {
+//                 id
+//                 name
+//                 processedAt
+//                 subtotalPrice {
+//                   amount
+//                   currencyCode
+//                 }
+//                 currentTotalTax {
+//                   amount
+//                   currencyCode
+//                 }
+//                 totalShippingPrice {
+//                   amount
+//                   currencyCode
+//                 }
+//                 shippingAddress {
+//                   address1
+//                   address2
+//                   city
+//                   province
+//                   country
+//                   zip
+//                 }
+//                 lineItems(first: 100) {
+//                   edges {
+//                     node {
+//                       title
+//                       quantity
+//                       customAttributes {
+//                         key
+//                         value
+//                       }
+//                     }
+//                   }
+//                 }
+//                 discountApplications(first: 10) {
+//                   edges {
+//                     node {
+//                       value {
+//                         ... on DiscountCodeApplication {
+//                           code
+//                         }
+//                         ... on AutomaticDiscountApplication {
+//                           title
+//                         }
+//                       }
+//                     }
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
+//     `;
+  
+//     try {
+//       const response = await axios.post(
+//         STOREFRONT_API_URL,
+//         { query, variables: { customerAccessToken } },
+//         {
+//           headers: {
+//             "Content-Type": "application/json",
+//             "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
+//           },
+//         }
+//       );
+  
+//       console.log('res' , JSON.string(response))
+
+//       const orders = response.data.data.customer.orders.edges.map(
+//         (order) => order.node
+//       );
+//       res.json({ success: true, orders });
+//     } catch (error) {
+//       console.error("Error Details:", JSON.stringify(error.response?.data, null, 2));
+//       res.status(500).json({
+//         success: false,
+//         error: error.response?.data?.errors[0]?.message || "Unknown error",
+//       });
+//     }
+//   };
+  
+
+  export const fetchOrderById = async (req,res) => {
+    const { orderId } = req.params;
+    try {
+        const response = await axios.get(`${ADMIN_API_URL}/orders/${orderId}.json`, {
+            headers: {
+                'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN
+            }
+        });
+        console.log('Order Details:', response.data.order);
+    } catch (error) {
+        console.error('Error fetching order:', error.response ? error.response.data : error.message);
+    }
+}
+
 
 export const fetchOrderStatus = async (orderId) => {
     const query = `
-        query GetOrderStatus($id: ID!) {
-          order(id: $id) {
-            id
-            name
-            
-            createdAt
-            totalPriceSet {
-              shopMoney {
-                amount
-                currencyCode
-              }
+      query GetOrderStatus($id: ID!) {
+        order(id: $id) {
+          id
+          name
+          createdAt
+          totalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
             }
-            lineItems(first: 10) {
-              edges {
-                node {
-                  title
-                  quantity
-                  
-                }
+          }
+          lineItems(first: 10) {
+            edges {
+              node {
+                title
+                quantity
               }
             }
           }
         }
-      `;
+      }
+    `;
+  
+    // Convert the raw orderId to a global ID
+    const globalOrderId = encodeShopifyId("Order", orderId);
   
     try {
       const response = await axios.post(
         ADMIN_API_URL,
         {
           query,
-          variables: { id: orderId },
+          variables: { id: globalOrderId },
         },
         {
           headers: {
@@ -172,4 +283,3 @@ export const fetchOrderStatus = async (orderId) => {
       throw new Error("Failed to fetch order status");
     }
   };
-  

@@ -1,5 +1,5 @@
 import express from "express";
-import { fetchOrder, fetchOrderStatus } from "../controllers/order/fetch.js";
+import { fetchOrder, fetchOrderById, fetchOrderStatus } from "../controllers/order/fetch.js";
 import {
   cancelOrder,
   returnOrder,
@@ -8,7 +8,7 @@ import {
 
 const orderRouter = express.Router();
 
-orderRouter.post("/", fetchOrder);
+orderRouter.get("/", fetchOrder);
 
 orderRouter.get("/:orderId/status", async (req, res) => {
   const { orderId } = req.params;
@@ -63,5 +63,11 @@ orderRouter.put("/:orderId/shipping", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+
+orderRouter.get("/:orderId" , fetchOrderById)
+
+
+
 
 export default orderRouter;
