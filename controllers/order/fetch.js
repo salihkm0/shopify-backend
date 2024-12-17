@@ -11,10 +11,10 @@ const STOREFRONT_API_URL = `https://${SHOPIFY_STORE_NAME}/api/2024-01/graphql.js
 const ADMIN_API_URL = `https://${SHOPIFY_STORE_NAME}/admin/api/2024-01/graphql.json`;
 
 export const fetchOrder = async (req, res) => {
-//   const { customerAccessToken } = req.body;
-  const { customerAccessToken } = req.body;
-  console.log("Fetching order : ", customerAccessToken)
-  const query = `
+    const { customerAccessToken } = req.body;
+    console.log("Fetching orders for customerAccessToken: ", customerAccessToken);
+  
+    const query = `
       query GetCustomerOrders($customerAccessToken: String!) {
         customer(customerAccessToken: $customerAccessToken) {
           orders(first: 100) {
@@ -22,12 +22,21 @@ export const fetchOrder = async (req, res) => {
               node {
                 id
                 name
+                processedAt
                 lineItems(first: 100) {
                   edges {
                     node {
                       title
                       quantity
                       variant {
+                        priceV2 {
+                          amount
+                          currencyCode
+                        }
+                        compareAtPriceV2 {
+                          amount
+                          currencyCode
+                        }
                         image {
                           src
                         }
@@ -68,48 +77,53 @@ export const fetchOrder = async (req, res) => {
         }
       }
     `;
-
-  try {
-    const response = await axios.post(
-      STOREFRONT_API_URL,
-      { query, variables: { customerAccessToken } },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
-        },
-      }
-    );
-
-    const orders = response.data.data.customer.orders.edges.map((order) => {
-      const node = order.node;
-
-      return {
-        id: node.id,
-        name: node.name,
-        totalPrice: node.currentTotalPrice,
-        fulfillmentStatus: node.fulfillmentStatus,
-        shippingAddress: node.shippingAddress,
-        items: node.lineItems.edges.map((item) => ({
-          title: item.node.title,
-          quantity: item.node.quantity,
-          image: item.node.variant?.image?.src || null,
-        })),
-      };
-    });
-
-    res.json({ success: true, orders });
-  } catch (error) {
-    console.error(
-      "Error Details:",
-      JSON.stringify(error.response?.data, null, 2)
-    );
-    res.status(500).json({
-      success: false,
-      error: error.response?.data?.errors[0]?.message || "Unknown error",
-    });
-  }
-};
+  
+    try {
+      const response = await axios.post(
+        STOREFRONT_API_URL,
+        { query, variables: { customerAccessToken } },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
+          },
+        }
+      );
+  
+      const orders = response.data.data.customer.orders.edges.map((order) => {
+        const node = order.node;
+  
+        return {
+          id: node.id,
+          name: node.name,
+          processedAt: node.processedAt, // Replacing createdAt
+          totalPrice: node.currentTotalPrice,
+          fulfillmentStatus: node.fulfillmentStatus,
+          shippingAddress: node.shippingAddress,
+          billingAddress: node.billingAddress,
+          items: node.lineItems.edges.map((item) => ({
+            title: item.node.title,
+            quantity: item.node.quantity,
+            price: item.node.variant?.priceV2 || null,
+            compareAtPrice: item.node.variant?.compareAtPriceV2 || null,
+            image: item.node.variant?.image?.src || null,
+          })),
+        };
+      });
+  
+      res.json({ success: true, orders });
+    } catch (error) {
+      console.error(
+        "Error Details:",
+        JSON.stringify(error.response?.data, null, 2)
+      );
+      res.status(500).json({
+        success: false,
+        error: error.response?.data?.errors[0]?.message || "Unknown error",
+      });
+    }
+  };
+  
 
 // export const fetchOrderStatus = async (orderId) => {
 //   const query = `
