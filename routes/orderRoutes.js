@@ -8,7 +8,7 @@ import {
 
 const orderRouter = express.Router();
 
-orderRouter.get("/", fetchOrder);
+orderRouter.post("/", fetchOrder);
 
 orderRouter.get("/:orderId/status", async (req, res) => {
   const { orderId } = req.params;

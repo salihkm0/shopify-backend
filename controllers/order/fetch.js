@@ -11,7 +11,7 @@ const STOREFRONT_API_URL = `https://${SHOPIFY_STORE_NAME}/api/2024-01/graphql.js
 const ADMIN_API_URL = `https://${SHOPIFY_STORE_NAME}/admin/api/2024-01/graphql.json`;
 
 export const fetchOrder = async (req, res) => {
-    
+//   const { customerAccessToken } = req.body;
   const { customerAccessToken } = req.body;
   console.log("Fetching order : ", customerAccessToken)
   const query = `
