@@ -5,6 +5,7 @@ import dbConnection from "./config/dbConnection.js";
 import userRouter from "./routes/userRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
+import cartRouter from "./routes/cartRoutes.js";
 
 
 const app = express();
@@ -17,6 +18,7 @@ const port = process.env.PORT || 3000;
 app.use("/api/customer", userRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/orders", orderRouter)
+app.use("/api/cart", cartRouter)
 
 dbConnection()
   .then(() => {
