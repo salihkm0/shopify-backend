@@ -6,6 +6,7 @@ import userRouter from "./routes/userRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
+import productsRouter from "./routes/productRoutes.js";
 
 
 const app = express();
@@ -19,6 +20,8 @@ app.use("/api/customer", userRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/orders", orderRouter)
 app.use("/api/cart", cartRouter)
+app.use("/api/products", productsRouter)
+
 
 dbConnection()
   .then(() => {
