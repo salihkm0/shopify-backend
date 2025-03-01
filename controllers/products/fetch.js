@@ -1,5 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import MetaController from "../../controllers/metacontroller/MetaController.js";
 
 dotenv.config(); // Load environment variables
 
@@ -132,8 +133,8 @@ export const fetchAllProducts = async (req, res) => {
       hasNextPage = products.pageInfo.hasNextPage;
       endCursor = products.pageInfo.endCursor;
     }
-
-    res.json({ success: true, products: allProducts });
+    const metaAllProduct=await MetaController(allProducts)
+    res.json({ success: true, products: metaAllProduct });
   } catch (error) {
     console.error("Error fetching Shopify products:", error.message);
     res.status(500).json({ success: false, message: error.message });
